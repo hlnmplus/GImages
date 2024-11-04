@@ -3,10 +3,17 @@ import creds
 
 gis = GoogleImagesSearch(creds.api, creds.cx)
 
-def get_img(query):
+def get_img(query, count):
     gis.search(search_params= {
         'q': query,
         'safe': 'active',
-        'num': 1,
+        'num': count,
     })
-    return gis.results()[0].url
+    if count == 1:
+        return gis.results()[0].url
+    else:
+        results = ""
+        response = gis.results()
+        for result in response:
+            results += f"{result.url}\n"
+        return results

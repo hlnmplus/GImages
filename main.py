@@ -16,12 +16,9 @@ class Client(commands.CommandsClient):
 
     @commands.command()
     async def gimg(self, ctx: commands.Context, *args):
-        """Get image from Google Images"""
+        """[count of images, 1 by default] - get image from Google Images"""
 
         arg = ""
-
-        for word in args: # very stupid way to get args
-            arg += f"{word} "
 
         banned = False
         if gimgsettings['usestoplist'] == True:
@@ -31,14 +28,31 @@ class Client(commands.CommandsClient):
                 else:
                     pass
         
-        if banned == False:
+        try:
+            count = int(args[0])
+            for word in range(1, len(args)):
+                arg += f"{args[word]} "
+        except:
+            count = 1
+            for word in args:
+                arg += f"{word} "
+        
+
+        if count>10:
+            toomanyimages = True
+        else:
+            toomanyimages = False
+
+        if toomanyimages == False and banned == False:
             try:
-                url = get_img(arg) # requesting image
+                url = get_img(arg, count) # requesting image
                 await ctx.send(f"Search query: {arg}\n{url}") # sending image via embed
             except IndexError:
                 await ctx.send("No images found")
-        else:
+        elif banned == True:
             await ctx.send(f"Your search query contains banned words")
+        elif toomanyimages == True:
+            await ctx.send(f"You requested too many images (>10)")
 
 
 async def main():

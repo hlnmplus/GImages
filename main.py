@@ -1,10 +1,18 @@
 import asyncio
 import aiohttp
 import next
+import log
 import creds
+from time import sleep
+from random import choice
 from creds import gimgsettings
 from next.ext import commands
 from api import get_img
+
+version = "1.0.4"
+
+logger = log.createLogger(fileName = "gimg.log")
+logger.log('Starting GImages')
 
 class Client(commands.CommandsClient):
     async def get_prefix(self, message: next.Message):
@@ -13,36 +21,38 @@ class Client(commands.CommandsClient):
     @commands.command()
     async def gimg(self, ctx: commands.Context, *args):
         """[count of images, 1 by default] - get image from Google Images"""
-
-        arg = ""
+ 
+        query = ""
 
         banned = False
-        if gimgsettings['usestoplist'] == True:
-            for banword in gimgsettings['stoplist']:
-                if banword in arg:
-                    banned = True
-                else:
-                    pass
-        
+
         try:
             count = int(args[0])
             for word in range(1, len(args)):
-                arg += f"{args[word]} "
+                query += f"{args[word]} "
         except:
             count = 1
             for word in args:
-                arg += f"{word} "
+                query += f"{word} "
         
+        if gimgsettings['usestoplist'] == True:
+            for banword in gimgsettings['stoplist']:
+                if banword in query:
+                    banned = True
+                else:
+                    pass
 
         if count > 10:
             toomanyimages = True
         else:
             toomanyimages = False
 
+        logger.log(f'{ctx.author.id} ({ctx.author.original_name}#{ctx.author.discriminator}) requested count={count}, query="{query}"')
+
         if toomanyimages == False and banned == False:
             try:
-                url = get_img(arg, count) # requesting image
-                await ctx.send(f"Search query: {arg}\n{url}") # sending image via embed
+                url = get_img(query, count) # requesting image
+                await ctx.send(f"Search query: {query}\n{url}") # sending image via embed
             except IndexError:
                 await ctx.send("No images found")
         elif banned == True:
@@ -55,6 +65,11 @@ async def main():
     async with aiohttp.ClientSession() as session:
         client = Client(session, creds.bot)
         print("Running GImages")
+        logger.info(f"GImages started, v{version}")
         await client.start()
-        
-asyncio.run(main())
+
+
+try:
+    asyncio.run(main())
+except KeyboardInterrupt:
+    logger.info(f"GImages exited manually")

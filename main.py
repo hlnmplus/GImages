@@ -2,13 +2,9 @@ import asyncio
 import aiohttp
 import next
 import creds
+from creds import gimgsettings
 from next.ext import commands
 from api import get_img
-
-gimgsettings = {
-    "usestoplist": True,
-    "stoplist": ["пенис", "хуй", "шлюха", "penis", "pride", 'lgbt', "лгбт", "прайд", "dick", "1488", "swastika", "свастика", "свастон"]
-}
 
 class Client(commands.CommandsClient):
     async def get_prefix(self, message: next.Message):
@@ -38,7 +34,7 @@ class Client(commands.CommandsClient):
                 arg += f"{word} "
         
 
-        if count>10:
+        if count > 10:
             toomanyimages = True
         else:
             toomanyimages = False
@@ -58,7 +54,7 @@ class Client(commands.CommandsClient):
 async def main():
     async with aiohttp.ClientSession() as session:
         client = Client(session, creds.bot)
-        print("Running GIMG")
+        print("Running GImages")
         await client.start()
         
 asyncio.run(main())

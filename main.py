@@ -1,16 +1,12 @@
 import asyncio
 import aiohttp
 import next
-import log
 import creds
 from time import sleep
 from random import choice
 from creds import gimgsettings
 from next.ext import commands
 from api import get_img
-
-logger = log.createLogger(fileName = "gimg.log")
-logger.log('Starting GImages')
 
 class Client(commands.CommandsClient):
     async def get_prefix(self, message: next.Message):
@@ -45,28 +41,22 @@ class Client(commands.CommandsClient):
         else:
             toomanyimages = False
 
-        logger.log(f'{ctx.author.id} ({ctx.author.original_name}#{ctx.author.discriminator}) requested count={count}, query="{query}"')
-
         if toomanyimages == False and banned == False:
             try:
                 url = get_img(query, count) # requesting image
                 await ctx.send(f"Search query: {query}\n{url}") # sending image via embed
             except IndexError:
                 await ctx.send("No images found")
-        elif banned == True:
+        elif banned:
             await ctx.send(f"Your search query contains banned words")
-        elif toomanyimages == True:
+        elif toomanyimages:
             await ctx.send(f"You requested too many images (>10)")
 
 
 async def main():
     async with aiohttp.ClientSession() as session:
         client = Client(session, creds.bot)
-        logger.info("GImages started")
         await client.start()
 
 
-try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    logger.info(f"GImages exited manually")
+asyncio.run(main())

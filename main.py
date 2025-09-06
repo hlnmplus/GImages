@@ -9,8 +9,6 @@ from creds import gimgsettings
 from next.ext import commands
 from api import get_img
 
-version = "1.0.4"
-
 logger = log.createLogger(fileName = "gimg.log")
 logger.log('Starting GImages')
 
@@ -64,8 +62,7 @@ class Client(commands.CommandsClient):
 async def main():
     async with aiohttp.ClientSession() as session:
         client = Client(session, creds.bot)
-        print("Running GImages")
-        logger.info(f"GImages started, v{version}")
+        logger.info("GImages started")
         await client.start()
 
 
